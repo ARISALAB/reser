@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+// Ρυθμίσεις Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCEkDMQ2Q3N886s8SyG03p6ZgzwO3N4pX4",
     authDomain: "reser-dfb9a.firebaseapp.com",
@@ -11,6 +12,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
+// Ρυθμίσεις Telegram (Με τα δικά σου στοιχεία)
+const telegramToken = "8738423907:AAG7kflGAD3fEtyLIe--AgJhIkEI7nOXS0w";
+const chatId = "8145219232"; // Το Chat ID σου από το screenshot
 
 const urlParams = new URLSearchParams(window.location.search);
 const shopID = urlParams.get('shop') || "default_store";
@@ -23,21 +28,15 @@ const timeSelect = document.getElementById('time-select');
 // Δημιουργία Ωρών (08:00 - 23:30)
 function setupTimeElements() {
     for (let h = 8; h <= 23; h++) {
-        // Μετατροπή ώρας σε μορφή 08, 09 κλπ για ομοιομορφία
         const hourStr = h < 10 ? '0' + h : h;
-        
         [`${hourStr}:00`, `${hourStr}:30`].forEach(t => {
-            // Dropdown
             const option = document.createElement('option');
-            option.value = t;
-            option.innerText = t;
+            option.value = t; option.innerText = t;
             timeSelect.appendChild(option);
 
-            // Slots
             const div = document.createElement('div');
             div.className = 'time-slot';
-            div.innerText = t;
-            div.dataset.time = t;
+            div.innerText = t; div.dataset.time = t;
             div.onclick = () => updateSelection(t);
             timeContainer.appendChild(div);
         });
@@ -47,19 +46,13 @@ function setupTimeElements() {
 function updateSelection(time) {
     selectedTime = time;
     timeSelect.value = time;
-    document.querySelectorAll('.time-slot').forEach(s => {
-        s.classList.toggle('selected', s.dataset.time === time);
-    });
+    document.querySelectorAll('.time-slot').forEach(s => s.classList.toggle('selected', s.dataset.time === time));
     document.getElementById('open-modal').style.display = 'block';
 }
 
-timeSelect.onchange = (e) => {
-    if(e.target.value) updateSelection(e.target.value);
-};
-
+timeSelect.onchange = (e) => { if(e.target.value) updateSelection(e.target.value); };
 setupTimeElements();
 
-// Modal & Save Logic
 const modal = document.getElementById('booking-modal');
 document.getElementById('open-modal').onclick = () => {
     if(!document.getElementById('cust-date-only').value) return alert("Επιλέξτε ημερομηνία!");
@@ -67,6 +60,20 @@ document.getElementById('open-modal').onclick = () => {
 };
 document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
 
+// ΣΥΝΑΡΤΗΣΗ ΕΙΔΟΠΟΙΗΣΗΣ TELEGRAM
+async function sendTelegramNotification(data) {
+    const message = `🔔 *Νέα Κράτηση!*\n📍 Μαγαζί: *${shopID}*\n👤 Πελάτης: ${data.name}\n📞 Τηλέφωνο: ${data.phone}\n👥 Άτομα: ${data.guests}\n📅 Ημερομηνία: ${data.date}\n⏰ Ώρα: ${data.time}\n📧 Email: ${data.email || '---'}`;
+
+    try {
+        await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
+        });
+    } catch (e) { console.error("Telegram error", e); }
+}
+
+// ΑΠΟΘΗΚΕΥΣΗ ΚΑΙ ΕΙΔΟΠΟΙΗΣΗ
 document.getElementById('btn-save').onclick = () => {
     const name = document.getElementById('cust-name').value;
     const phone = document.getElementById('cust-phone').value;
@@ -76,11 +83,11 @@ document.getElementById('btn-save').onclick = () => {
 
     if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
 
-    set(push(ref(db, 'reservations/' + shopID)), {
-        name, phone, email, date, time: selectedTime, guests,
-        timestamp: Date.now()
-    }).then(() => {
-        alert("Επιτυχία! Η κράτηση στάλθηκε.");
+    const bookingData = { name, phone, email, date, time: selectedTime, guests, timestamp: Date.now() };
+
+    set(push(ref(db, 'reservations/' + shopID)), bookingData).then(() => {
+        sendTelegramNotification(bookingData);
+        alert("Η κράτηση στάλθηκε! Δες το Telegram σου!");
         location.reload();
     });
 };
