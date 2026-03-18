@@ -11,36 +11,49 @@
 <div class="app-container">
     <header>
         <h1>Table<span>Res</span></h1>
-        <p>Κάντε την κράτησή σας σε δευτερόλεπτα</p>
+        <p id="shop-name">Κράτηση Τραπεζιού</p>
     </header>
 
-    <main class="card">
+    <main class="card" id="booking-section">
         <div class="input-group">
             <label>Ονοματεπώνυμο</label>
-            <input type="text" id="name" placeholder="π.χ. Γιώργος Παπαδόπουλος">
+            <input type="text" id="cust-name" placeholder="π.χ. Νίκος Παππάς">
         </div>
 
         <div class="row">
             <div class="input-group">
                 <label>Άτομα</label>
-                <input type="number" id="guests" value="2" min="1">
+                <input type="number" id="cust-guests" value="2" min="1">
             </div>
             <div class="input-group">
                 <label>Ώρα & Ημερομηνία</label>
-                <input type="datetime-local" id="date">
+                <input type="datetime-local" id="cust-date">
             </div>
         </div>
 
-        <button class="btn-primary" onclick="saveBooking()">Επιβεβαίωση Κράτησης</button>
+        <button class="btn-primary" id="btn-save">Επιβεβαίωση Κράτησης</button>
     </main>
 
-    <section class="admin-section">
-        <h3>Πάνελ Καταστήματος</h3>
-        <div id="reservation-list" class="list-container">
+    <hr class="divider">
+
+    <section class="admin-area">
+        <div id="login-form" class="card">
+            <h3>Είσοδος Καταστήματος</h3>
+            <input type="email" id="admin-email" placeholder="Email">
+            <input type="password" id="admin-pass" placeholder="Κωδικός">
+            <button class="btn-secondary" id="btn-login">Είσοδος</button>
+        </div>
+
+        <div id="admin-dashboard" class="card" style="display:none;">
+            <h3>Πρόσφατες Κρατήσεις</h3>
+            <div id="reservation-list">
+                <p>Φόρτωση...</p>
             </div>
+            <button class="btn-outline" id="btn-logout">Έξοδος</button>
+        </div>
     </section>
 </div>
 
-<script src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
