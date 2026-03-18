@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TableRes | Σύστημα Κρατήσεων</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>Table<span>Res</span></h1>
+        <p>Κάντε την κράτησή σας σε δευτερόλεπτα</p>
+    </header>
+
+    <main class="card">
+        <div class="input-group">
+            <label>Ονοματεπώνυμο</label>
+            <input type="text" id="name" placeholder="π.χ. Γιώργος Παπαδόπουλος">
+        </div>
+
+        <div class="row">
+            <div class="input-group">
+                <label>Άτομα</label>
+                <input type="number" id="guests" value="2" min="1">
+            </div>
+            <div class="input-group">
+                <label>Ώρα & Ημερομηνία</label>
+                <input type="datetime-local" id="date">
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="saveBooking()">Επιβεβαίωση Κράτησης</button>
+    </main>
+
+    <section class="admin-section">
+        <h3>Πάνελ Καταστήματος</h3>
+        <div id="reservation-list" class="list-container">
+            </div>
+    </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
