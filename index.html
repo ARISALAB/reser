@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Κράτηση Τραπεζιού</title>
+    <title>TableRes | Κράτηση Τραπεζιού</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <div class="app-container">
         <header>
             <h1>Table<span>Res</span></h1>
@@ -14,23 +16,58 @@
         </header>
 
         <main class="card">
-            <div class="input-group">
-                <label>Όνομα</label>
-                <input type="text" id="cust-name" placeholder="Το όνομά σας">
-            </div>
+            <h3 style="margin-top:0; text-align:center; color:var(--dark);">Νέα Κράτηση</h3>
+            
             <div class="row">
                 <div class="input-group">
                     <label>Άτομα</label>
-                    <input type="number" id="cust-guests" value="2" min="1">
+                    <input type="number" id="cust-guests" value="2" min="1" max="20">
                 </div>
                 <div class="input-group">
                     <label>Ημερομηνία & Ώρα</label>
                     <input type="datetime-local" id="cust-date">
                 </div>
             </div>
-            <button class="btn-primary" id="btn-save">Επιβεβαίωση Κράτησης</button>
+
+            <button class="btn-primary" id="open-modal" style="margin-top: 10px;">
+                Συνέχεια Κράτησης
+            </button>
         </main>
+
+        <footer style="text-align:center; font-size:0.8rem; color:#94a3b8; margin-top:20px;">
+            &copy; 2026 TableRes System
+        </footer>
     </div>
+
+    <div id="booking-modal" class="modal">
+        <div class="modal-content card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Στοιχεία Επικοινωνίας</h3>
+            </div>
+            
+            <div class="input-group">
+                <label>Ονοματεπώνυμο</label>
+                <input type="text" id="cust-name" placeholder="π.χ. Νίκος Παπαδόπουλος">
+            </div>
+
+            <div class="input-group">
+                <label>Τηλέφωνο</label>
+                <input type="tel" id="cust-phone" placeholder="6912345678">
+            </div>
+
+            <div class="input-group">
+                <label>Email (Προαιρετικό)</label>
+                <input type="email" id="cust-email" placeholder="mail@example.com">
+            </div>
+
+            <div style="margin-top:20px;">
+                <button class="btn-primary" id="btn-save">Επιβεβαίωση & Αποστολή</button>
+                <button class="btn-link" id="close-modal">Επιστροφή στην αλλαγή ώρας</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="client.js"></script>
+
 </body>
 </html>
