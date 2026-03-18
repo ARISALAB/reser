@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Table<span>Admin</span></h1>
+        </header>
+
+        <div id="login-section" class="card">
+            <h3>Είσοδος Καταστήματος</h3>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="email" placeholder="email@example.com">
+            </div>
+            <div class="input-group">
+                <label>Κωδικός</label>
+                <input type="password" id="pass" placeholder="******">
+            </div>
+            <button class="btn-primary" id="btn-login">Είσοδος</button>
+        </div>
+
+        <div id="dashboard" class="card" style="display:none;">
+            <h3>Κρατήσεις: <span id="shop-title"></span></h3>
+            <div id="reservation-list">Φόρτωση...</div>
+            <button class="btn-outline" id="btn-logout">Έξοδος</button>
+        </div>
+    </div>
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
