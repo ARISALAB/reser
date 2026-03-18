@@ -18,9 +18,18 @@ document.getElementById('shop-display').innerText = "Κράτηση στο: " + 
 
 let selectedTime = null;
 
-// 1. Δημιουργία Ωρών (18:00 - 23:30)
-const timeContainer = document.getElementById('time-slots-container');
+// Εμφάνιση ωρών όταν επιλεγεί ημερομηνία
+document.getElementById('cust-date-only').addEventListener('change', function() {
+    if(this.value) {
+        document.getElementById('time-selection-area').style.display = 'block';
+        generateSlots();
+    }
+});
+
+// Δημιουργία Slots (18:00 - 23:30)
 function generateSlots() {
+    const timeContainer = document.getElementById('time-slots-container');
+    timeContainer.innerHTML = ""; // Καθαρισμός
     for (let h = 18; h < 24; h++) {
         [h + ":00", h + ":30"].forEach(t => {
             const div = document.createElement('div');
@@ -30,11 +39,36 @@ function generateSlots() {
                 document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
                 div.classList.add('selected');
                 selectedTime = t;
-                document.getElementById('open-modal').style.display = 'block';
+                document.getElementById('guests-selection-area').style.display = 'block';
             };
             timeContainer.appendChild(div);
         });
     }
+}
+
+// Modal Control
+const modal = document.getElementById('booking-modal');
+document.getElementById('open-modal').onclick = () => modal.style.display = 'flex';
+document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+// Αποστολή στο Firebase
+document.getElementById('btn-save').onclick = () => {
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const email = document.getElementById('cust-email').value;
+    const date = document.getElementById('cust-date-only').value;
+    const guests = document.getElementById('cust-guests').value;
+
+    if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
+
+    set(push(ref(db, 'reservations/' + shopID)), {
+        name, phone, email, date, time: selectedTime, guests,
+        timestamp: Date.now()
+    }).then(() => {
+        alert("Η κράτηση στάλθηκε επιτυχώς!");
+        location.reload();
+    });
+};    }
 }
 generateSlots();
 
