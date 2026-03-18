@@ -1,40 +1,93 @@
-<!DOCTYPE html>
-<html lang="el">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TableRes | Κράτηση</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    <div class="app-container">
-        <header>
-            <h1>Table<span>Res</span></h1>
-            <p id="shop-display">Φόρτωση καταστήματος...</p>
-        </header>
+const firebaseConfig = {
+    apiKey: "AIzaSyCEkDMQ2Q3N886s8SyG03p6ZgzwO3N4pX4",
+    authDomain: "reser-dfb9a.firebaseapp.com",
+    databaseURL: "https://reser-dfb9a-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "reser-dfb9a",
+    appId: "1:326928829934:web:f4c60a81f66f97ca2112ff"
+};
 
-        <main class="card">
-            <div class="input-group">
-                <label>1. Επιλέξτε Ημερομηνία</label>
-                <input type="date" id="cust-date-only">
-            </div>
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-            <div class="input-group">
-                <label>2. Άτομα</label>
-                <input type="number" id="cust-guests" value="2" min="1" max="20">
-            </div>
+const urlParams = new URLSearchParams(window.location.search);
+const shopID = urlParams.get('shop') || "default_store";
+document.getElementById('shop-display').innerText = "Κράτηση στο: " + shopID;
 
-            <div class="input-group">
-                <label>3. Επιλέξτε Ώρα (Dropdown)</label>
-                <select id="time-select">
-                    <option value="">Επιλέξτε ώρα...</option>
-                    </select>
-            </div>
+let selectedTime = null;
+const timeContainer = document.getElementById('time-slots-container');
+const timeSelect = document.getElementById('time-select');
 
-            <label style="font-size: 0.85rem; font-weight: 600;">Ή επιλέξτε από τα διαθέσιμα slots:</label>
-            <div id="time-slots-container" class="time-grid"></div>
+// Δημιουργία Ωρών (18:00 - 23:30)
+function setupTimeElements() {
+    for (let h = 18; h < 24; h++) {
+        [`${h}:00`, `${h}:30`].forEach(t => {
+            // 1. Προσθήκη στο Dropdown
+            const option = document.createElement('option');
+            option.value = t;
+            option.innerText = t;
+            timeSelect.appendChild(option);
+
+            // 2. Προσθήκη στα Slots
+            const div = document.createElement('div');
+            div.className = 'time-slot';
+            div.innerText = t;
+            div.dataset.time = t; // Για να το βρίσκουμε εύκολα
+            div.onclick = () => updateSelection(t);
+            timeContainer.appendChild(div);
+        });
+    }
+}
+
+// Συνάρτηση που ενημερώνει και τα δύο πεδία (Dropdown & Slots)
+function updateSelection(time) {
+    selectedTime = time;
+    timeSelect.value = time; // Ενημέρωση dropdown
+    
+    // Ενημέρωση εμφάνισης slots
+    document.querySelectorAll('.time-slot').forEach(s => {
+        s.classList.toggle('selected', s.dataset.time === time);
+    });
+    
+    document.getElementById('open-modal').style.display = 'block';
+}
+
+// Event listener για το Dropdown
+timeSelect.onchange = (e) => {
+    if(e.target.value) updateSelection(e.target.value);
+};
+
+setupTimeElements();
+
+// Modal Logic
+const modal = document.getElementById('booking-modal');
+document.getElementById('open-modal').onclick = () => {
+    if(!document.getElementById('cust-date-only').value) return alert("Επιλέξτε ημερομηνία!");
+    modal.style.display = 'flex';
+};
+document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+// Save Logic
+document.getElementById('btn-save').onclick = () => {
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const email = document.getElementById('cust-email').value;
+    const date = document.getElementById('cust-date-only').value;
+    const guests = document.getElementById('cust-guests').value;
+
+    if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
+
+    const bookingRef = ref(db, 'reservations/' + shopID);
+    set(push(bookingRef), {
+        name, phone, email, date, time: selectedTime, guests,
+        timestamp: Date.now()
+    }).then(() => {
+        alert("Επιτυχία! Η κράτηση στάλθηκε.");
+        location.reload();
+    });
+};            <div id="time-slots-container" class="time-grid"></div>
 
             <button class="btn-primary" id="open-modal" style="margin-top: 25px; display:none;">
                 Συνέχεια Κράτησης
