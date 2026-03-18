@@ -15,7 +15,7 @@ body {
 .app-container { width: 100%; max-width: 420px; }
 
 header { text-align: center; margin-bottom: 20px; }
-header h1 span { color: var(--primary); font-weight: 800; }
+header h1 span { color: var(--primary); }
 
 .card {
     background: var(--white);
@@ -25,18 +25,27 @@ header h1 span { color: var(--primary); font-weight: 800; }
 }
 
 .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--dark); }
-input { 
+label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--dark); }
+
+input, select { 
     padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; outline: none;
 }
-input:focus { border-color: var(--primary); }
 
+/* TIME GRID ΜΕ SCROLL */
 .time-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 10px; 
+    margin-top: 10px;
+    max-height: 200px; /* Περιορισμός ύψους */
+    overflow-y: auto; /* Scrollbar αν χρειάζεται */
+    padding: 5px;
+    border: 1px solid #f1f5f9;
+    border-radius: 8px;
 }
 
 .time-slot {
-    padding: 12px 5px; background: #f1f5f9; border: 1px solid #e2e8f0;
+    padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0;
     border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.9rem;
 }
 
@@ -44,32 +53,20 @@ input:focus { border-color: var(--primary); }
     background: var(--primary); color: white; border-color: var(--primary);
 }
 
+/* MODAL */
 .modal {
     display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-    width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75);
+    width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(4px); align-items: center; justify-content: center;
 }
 
-.modal-content { width: 90%; max-width: 380px; animation: slideIn 0.3s ease; }
-
-@keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-content { width: 90%; max-width: 380px; }
 
 .btn-primary {
     width: 100%; padding: 14px; background: var(--primary);
     color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
 }
 
-.btn-link { background: none; border: none; color: #64748b; width: 100%; margin-top: 10px; cursor: pointer; }
-/* Πρόσθεσε αυτό στο υπάρχον style.css */
-select {
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: white;
-    cursor: pointer;
-    outline: none;
+.btn-link {
+    background: none; border: none; color: #64748b; width: 100%; margin-top: 10px; cursor: pointer;
 }
-select:focus { border-color: var(--primary); }
-
-.time-grid { margin-top: 15px; } /* Μικρό περιθώριο */
