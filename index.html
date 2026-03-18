@@ -21,21 +21,24 @@
                 <input type="date" id="cust-date-only">
             </div>
 
-            <div id="time-selection-area" style="display: none; margin-top: 20px;">
-                <label style="font-size: 0.85rem; font-weight: 600;">2. Επιλέξτε Ώρα (ανά μισάωρο)</label>
-                <div id="time-slots-container" class="time-grid">
-                    </div>
+            <div class="input-group">
+                <label>2. Άτομα</label>
+                <input type="number" id="cust-guests" value="2" min="1" max="20">
             </div>
 
-            <div id="guests-selection-area" style="display: none; margin-top: 20px;">
-                <div class="input-group">
-                    <label>3. Αριθμός Ατόμων</label>
-                    <input type="number" id="cust-guests" value="2" min="1" max="20">
-                </div>
-                <button class="btn-primary" id="open-modal" style="margin-top: 10px;">
-                    Συνέχεια Κράτησης
-                </button>
+            <div class="input-group">
+                <label>3. Επιλέξτε Ώρα (Dropdown)</label>
+                <select id="time-select">
+                    <option value="">Επιλέξτε ώρα...</option>
+                    </select>
             </div>
+
+            <label style="font-size: 0.85rem; font-weight: 600;">Ή επιλέξτε από τα διαθέσιμα slots:</label>
+            <div id="time-slots-container" class="time-grid"></div>
+
+            <button class="btn-primary" id="open-modal" style="margin-top: 25px; display:none;">
+                Συνέχεια Κράτησης
+            </button>
         </main>
     </div>
 
@@ -55,7 +58,7 @@
                 <input type="email" id="cust-email" placeholder="mail@example.com">
             </div>
             <button class="btn-primary" id="btn-save">Ολοκλήρωση Κράτησης</button>
-            <button class="btn-link" id="close-modal">Αλλαγή ώρας/ημερομηνίας</button>
+            <button class="btn-link" id="close-modal">Αλλαγή ώρας</button>
         </div>
     </div>
 
