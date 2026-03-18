@@ -17,62 +17,51 @@ const shopID = urlParams.get('shop') || "default_store";
 document.getElementById('shop-display').innerText = "Κράτηση στο: " + shopID;
 
 let selectedTime = null;
+const timeContainer = document.getElementById('time-slots-container');
+const timeSelect = document.getElementById('time-select');
 
-// Εμφάνιση ωρών όταν επιλεγεί ημερομηνία
-document.getElementById('cust-date-only').addEventListener('change', function() {
-    if(this.value) {
-        document.getElementById('time-selection-area').style.display = 'block';
-        generateSlots();
-    }
-});
-
-// Δημιουργία Slots (18:00 - 23:30)
-function generateSlots() {
-    const timeContainer = document.getElementById('time-slots-container');
-    timeContainer.innerHTML = ""; // Καθαρισμός
+// Δημιουργία Ωρών (18:00 - 23:30)
+function setupTimeElements() {
     for (let h = 18; h < 24; h++) {
-        [h + ":00", h + ":30"].forEach(t => {
+        [`${h}:00`, `${h}:30`].forEach(t => {
+            // 1. Προσθήκη στο Dropdown
+            const option = document.createElement('option');
+            option.value = t;
+            option.innerText = t;
+            timeSelect.appendChild(option);
+
+            // 2. Προσθήκη στα Slots
             const div = document.createElement('div');
             div.className = 'time-slot';
             div.innerText = t;
-            div.onclick = () => {
-                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-                div.classList.add('selected');
-                selectedTime = t;
-                document.getElementById('guests-selection-area').style.display = 'block';
-            };
+            div.dataset.time = t; // Για να το βρίσκουμε εύκολα
+            div.onclick = () => updateSelection(t);
             timeContainer.appendChild(div);
         });
     }
 }
 
-// Modal Control
-const modal = document.getElementById('booking-modal');
-document.getElementById('open-modal').onclick = () => modal.style.display = 'flex';
-document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
-
-// Αποστολή στο Firebase
-document.getElementById('btn-save').onclick = () => {
-    const name = document.getElementById('cust-name').value;
-    const phone = document.getElementById('cust-phone').value;
-    const email = document.getElementById('cust-email').value;
-    const date = document.getElementById('cust-date-only').value;
-    const guests = document.getElementById('cust-guests').value;
-
-    if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
-
-    set(push(ref(db, 'reservations/' + shopID)), {
-        name, phone, email, date, time: selectedTime, guests,
-        timestamp: Date.now()
-    }).then(() => {
-        alert("Η κράτηση στάλθηκε επιτυχώς!");
-        location.reload();
+// Συνάρτηση που ενημερώνει και τα δύο πεδία (Dropdown & Slots)
+function updateSelection(time) {
+    selectedTime = time;
+    timeSelect.value = time; // Ενημέρωση dropdown
+    
+    // Ενημέρωση εμφάνισης slots
+    document.querySelectorAll('.time-slot').forEach(s => {
+        s.classList.toggle('selected', s.dataset.time === time);
     });
-};    }
+    
+    document.getElementById('open-modal').style.display = 'block';
 }
-generateSlots();
 
-// 2. Έλεγχος Modal
+// Event listener για το Dropdown
+timeSelect.onchange = (e) => {
+    if(e.target.value) updateSelection(e.target.value);
+};
+
+setupTimeElements();
+
+// Modal Logic
 const modal = document.getElementById('booking-modal');
 document.getElementById('open-modal').onclick = () => {
     if(!document.getElementById('cust-date-only').value) return alert("Επιλέξτε ημερομηνία!");
@@ -80,7 +69,7 @@ document.getElementById('open-modal').onclick = () => {
 };
 document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
 
-// 3. Τελική Αποστολή
+// Save Logic
 document.getElementById('btn-save').onclick = () => {
     const name = document.getElementById('cust-name').value;
     const phone = document.getElementById('cust-phone').value;
