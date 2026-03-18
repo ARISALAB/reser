@@ -60,3 +60,16 @@ input:focus { border-color: var(--primary); }
 }
 
 .btn-link { background: none; border: none; color: #64748b; width: 100%; margin-top: 10px; cursor: pointer; }
+/* Πρόσθεσε αυτό στο υπάρχον style.css */
+select {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+}
+select:focus { border-color: var(--primary); }
+
+.time-grid { margin-top: 15px; } /* Μικρό περιθώριο */
