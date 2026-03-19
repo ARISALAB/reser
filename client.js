@@ -55,15 +55,15 @@ document.getElementById('open-modal').onclick = () => {
 };
 document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
 
+// ... (το υπόλοιπο client.js παραμένει ίδιο) ...
+
 document.getElementById('btn-save').onclick = () => {
     const name = document.getElementById('cust-name').value;
     const phone = document.getElementById('cust-phone').value;
     const email = document.getElementById('cust-email').value;
     const date = document.getElementById('cust-date-only').value;
     const guests = document.getElementById('cust-guests').value;
-    
-    // ΣΥΛΛΟΓΗ ΝΕΩΝ ΠΕΔΙΩΝ
-    const location = document.getElementById('cust-location').value;
+    const locationChoice = document.getElementById('cust-location').value;
     const occasion = document.getElementById('cust-occasion').value;
     const comments = document.getElementById('cust-comments').value;
 
@@ -72,12 +72,15 @@ document.getElementById('btn-save').onclick = () => {
     const bookingData = { 
         name, phone, email, date, 
         time: selectedTime, guests, 
-        location, occasion, comments, // Αποθήκευση στη βάση
+        location: locationChoice,
+        occasion,
+        comments,
         timestamp: Date.now() 
     };
 
     set(push(ref(db, 'reservations/' + shopID)), bookingData).then(() => {
         alert("Επιτυχία! Η κράτηση αποθηκεύτηκε.");
-        location.reload();
+        // Επιστροφή στην αρχική σελίδα του μαγαζιού (καθαρίζει το modal και τις επιλογές)
+        window.location.href = window.location.pathname + "?shop=" + shopID;
     });
 };
