@@ -17,36 +17,47 @@ const auth = getAuth(app);
 let allReservations = []; 
 
 // --- ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ & URL ---
+// --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ (AUTH + URL MATCH) ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        // 1. Παίρνουμε το shop από το URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlShop = urlParams.get('shop');
+
+        // 2. Αν δεν υπάρχει shop στο URL, τον πετάμε έξω αμέσως
+        if (!urlShop) {
+            alert("ΣΦΑΛΜΑ: Δεν έχει οριστεί κατάστημα στο URL!");
+            signOut(auth);
+            return;
+        }
+
+        // 3. Τσεκάρουμε στη βάση αν αυτό το UID επιτρέπεται να μπει στο συγκεκριμένο shop του URL
         const snapshot = await get(ref(db, 'users_to_shops/' + user.uid));
         
         if (snapshot.exists()) {
-            const myAssignedShop = snapshot.val(); 
+            const myAssignedShop = snapshot.val(); // Τι λέει η βάση για αυτόν τον χρήστη
 
-            // ΔΙΑΧΕΙΡΙΣΗ URL: Κρατάμε το ?shop= στο URL για τον επαγγελματισμό
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlShop = urlParams.get('shop');
-
+            // 4. Η ΚΡΙΣΙΜΗ ΔΙΑΣΤΑΥΡΩΣΗ:
+            // Αν αυτό που λέει το URL ΔΕΝ είναι αυτό που επιτρέπει η βάση για αυτόν τον χρήστη
             if (urlShop !== myAssignedShop) {
-                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?shop=' + myAssignedShop;
-                window.history.replaceState({path:newUrl}, '', newUrl);
+                alert("ΑΠΑΓΟΡΕΥΕΤΑΙ: Δεν έχετε δικαιώματα πρόσβασης για το κατάστημα: " + urlShop);
+                signOut(auth); // Τον αποσυνδέουμε αναγκαστικά
+                return;
             }
 
+            // ΑΝ ΟΛΑ ΕΙΝΑΙ ΣΩΣΤΑ (Το UID ταιριάζει με το Shop του URL)
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             document.getElementById('shop-title').innerText = myAssignedShop;
             
-            // Προεπιλογή ημερομηνίας: Σήμερα
+            // Προεπιλογή ημερομηνίας
             const today = new Date().toISOString().split('T')[0];
-            if(!document.getElementById('filter-from').value) {
-                document.getElementById('filter-from').value = today;
-                document.getElementById('filter-to').value = today;
-            }
+            document.getElementById('filter-from').value = today;
+            document.getElementById('filter-to').value = today;
 
             listenToReservations(myAssignedShop);
         } else {
-            alert("Ο λογαριασμός σας δεν έχει αντιστοιχιστεί σε κάποιο κατάστημα!");
+            alert("Ο λογαριασμός σας δεν είναι συνδεδεμένος με κανένα κατάστημα στη βάση!");
             signOut(auth);
         }
     } else {
@@ -54,7 +65,6 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('dashboard').style.display = 'none';
     }
 });
-
 // --- ΣΥΝΔΕΣΗ ΜΕ ΤΗ ΒΑΣΗ (REAL-TIME) ---
 function listenToReservations(shop) {
     onValue(ref(db, 'reservations/' + shop), (snapshot) => {
