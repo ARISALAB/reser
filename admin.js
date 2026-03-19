@@ -14,38 +14,41 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let allReservations = [];
+let allReservations = []; 
 
-// --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const urlParams = new URLSearchParams(window.location.search);
         const urlShop = urlParams.get('shop');
 
         if (!urlShop) {
-            alert("Σφάλμα: Πρέπει να υπάρχει το όνομα του μαγαζιού στο URL (?shop=...)");
-            signOut(auth); return;
+            alert("ΣΦΑΛΜΑ: Δεν έχει οριστεί κατάστημα στο URL!");
+            signOut(auth);
+            return;
         }
 
-        // Τσεκάρουμε αν το UID του χρήστη ταιριάζει με το shop του URL
         const snapshot = await get(ref(db, 'users_to_shops/' + user.uid));
-        const assignedShop = snapshot.val();
+        
+        if (snapshot.exists()) {
+            const myAssignedShop = snapshot.val(); 
 
-        if (snapshot.exists() && assignedShop === urlShop) {
-            // ΕΠΙΤΥΧΙΑ: Ο χρήστης είναι ο σωστός για αυτό το URL
+            if (urlShop !== myAssignedShop) {
+                alert("ΑΠΑΓΟΡΕΥΕΤΑΙ: Δεν έχετε δικαιώματα πρόσβασης για το κατάστημα: " + urlShop);
+                signOut(auth);
+                return;
+            }
+
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('shop-title').innerText = assignedShop;
+            document.getElementById('shop-title').innerText = myAssignedShop;
             
-            // Προεπιλογή Φίλτρου: Σήμερα
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('filter-from').value = today;
             document.getElementById('filter-to').value = today;
 
-            listenToReservations(assignedShop);
+            listenToReservations(myAssignedShop);
         } else {
-            // ΑΠΟΤΥΧΙΑ: Οι κωδικοί δεν είναι για αυτό το URL
-            alert("ΠΡΟΣΟΧΗ: Δεν έχετε δικαιώματα διαχείρισης για το κατάστημα: " + urlShop);
+            alert("Ο λογαριασμός σας δεν είναι συνδεδεμένος με κανένα κατάστημα στη βάση!");
             signOut(auth);
         }
     } else {
@@ -70,67 +73,69 @@ function renderDashboard(shop) {
     const toDate = document.getElementById('filter-to').value;
     const list = document.getElementById('reservation-list');
     
-    // Φιλτράρισμα & Ταξινόμηση
     let filtered = allReservations.filter(res => res.date >= fromDate && res.date <= toDate);
-    filtered.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
-    // Στατιστικά
+    filtered.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+    });
+
     let totalGuests = 0;
     filtered.forEach(res => totalGuests += parseInt(res.guests || 0));
+    
     document.getElementById('stat-count').innerText = filtered.length;
     document.getElementById('stat-guests').innerText = totalGuests;
 
     list.innerHTML = "";
     if (filtered.length === 0) {
-        list.innerHTML = "<p style='text-align:center; padding:30px; color:#94a3b8;'>Δεν βρέθηκαν κρατήσεις.</p>";
+        list.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>Καμία κράτηση για αυτές τις ημερομηνίες.</p>";
         return;
     }
 
     filtered.forEach(res => {
         const div = document.createElement('div');
-        div.className = "res-card";
-        div.style = "background:white; border-radius:12px; padding:15px; margin-bottom:15px; border-left:6px solid #2563eb; box-shadow:0 2px 5px rgba(0,0,0,0.05);";
+        div.className = "booking-item card";
+        div.style = "margin-bottom:12px; border-left:6px solid #2563eb; padding:15px; background:white; position:relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius:8px;";
         
+        // ΕΜΦΑΝΙΣΗ ΝΕΩΝ ΣΤΟΙΧΕΙΩΝ ΣΤΗΝ ΚΑΡΤΑ
         div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:start;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                    <span style="font-size:1.2rem; font-weight:800; color:#2563eb;">${res.time}</span>
-                    <span style="font-size:0.8rem; color:#64748b; margin-left:8px;">${res.date}</span>
+                    <span style="font-size:1.1rem; font-weight:800; color:#2563eb;">${res.time}</span>
+                    <span style="font-size:0.8rem; color:#94a3b8; margin-left:10px;">${res.date}</span>
                 </div>
-                <button onclick="deleteBooking('${shop}', '${res.id}')" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1.1rem;">❌</button>
+                <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:#ef4444; border:none; background:none; cursor:pointer; font-size:0.8rem;">Διαγραφή</button>
             </div>
-            
-            <div style="margin-top:10px;">
-                <div style="font-weight:700; font-size:1.1rem; color:#1e293b;">${res.name}</div>
-                <div style="font-size:0.95rem; color:#475569; margin-top:3px;">
-                    👥 <strong>${res.guests} άτομα</strong> | 📍 ${res.location}
+            <div style="margin-top:8px;">
+                <div style="font-weight:700; font-size:1rem;">${res.name}</div>
+                <div style="color:#475569; font-size:0.9rem;">
+                    👥 ${res.guests} άτομα | 📍 ${res.location || 'Εσωτερικός'}
                 </div>
                 
-                ${res.occasion ? `<div style="margin-top:8px; color:#db2777; font-weight:700; font-size:0.9rem;">🎁 Γεγονός: ${res.occasion}</div>` : ''}
+                ${res.occasion ? `<div style="color:#db2777; font-weight:700; font-size:0.85rem; margin-top:4px;">🎉 ${res.occasion}</div>` : ''}
+                ${res.comments ? `<div style="background:#f1f5f9; padding:8px; border-radius:6px; font-size:0.85rem; margin-top:6px; font-style:italic; color:#334155;">💬 ${res.comments}</div>` : ''}
                 
-                ${res.comments ? `<div style="margin-top:8px; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; font-size:0.85rem; font-style:italic;">💬 ${res.comments}</div>` : ''}
-                
-                <div style="margin-top:12px;">
-                    <a href="tel:${res.phone}" style="color:#2563eb; text-decoration:none; font-weight:bold; border:1px solid #2563eb; padding:5px 10px; border-radius:6px; font-size:0.85rem;">📞 Κλήση: ${res.phone}</a>
-                </div>
+                <div style="color:#2563eb; font-size:0.9rem; margin-top:8px; font-weight:600;">📞 <a href="tel:${res.phone}" style="text-decoration:none; color:inherit;">${res.phone}</a></div>
             </div>
         `;
         list.appendChild(div);
     });
 }
 
-// Λοιπές συναρτήσεις
+document.getElementById('filter-from').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
+document.getElementById('filter-to').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
+
 document.getElementById('btn-login').onclick = () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-    signInWithEmailAndPassword(auth, email, pass).catch(() => alert("Λάθος στοιχεία!"));
+    if(!email || !pass) return alert("Παρακαλώ συμπληρώστε όλα τα πεδία.");
+    signInWithEmailAndPassword(auth, email, pass).catch(() => alert("Λάθος στοιχεία πρόσβασης!"));
 };
 
 document.getElementById('btn-logout').onclick = () => signOut(auth);
 
 window.deleteBooking = (shop, id) => {
-    if(confirm("Οριστική διαγραφή κράτησης;")) remove(ref(db, `reservations/${shop}/${id}`));
+    if(confirm("Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την κράτηση;")) {
+        remove(ref(db, `reservations/${shop}/${id}`));
+    }
 };
-
-document.getElementById('filter-from').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
-document.getElementById('filter-to').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
