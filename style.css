@@ -1,72 +1,192 @@
-:root {
-    --primary: #2563eb;
-    --dark: #0f172a;
-    --bg: #f8fafc;
-    --white: #ffffff;
-    --radius: 12px;
+/* style.css */
+
+/* Βασικές Ρυθμίσεις (Normalize) */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    margin: 0; display: flex; justify-content: center; padding: 20px;
-}
-
-.app-container { width: 100%; max-width: 420px; }
-
-header { text-align: center; margin-bottom: 20px; }
-header h1 span { color: var(--primary); }
-
-.card {
-    background: var(--white);
+    background-color: #f1f5f9;
+    color: #1e293b;
+    display: flex;
+    justify-content: center;
     padding: 20px;
-    border-radius: var(--radius);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    -webkit-font-smoothing: antialiased;
 }
 
-.input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--dark); }
-
-input, select { 
-    padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; outline: none;
+/* Κεντρικό Container */
+.container {
+    background: white;
+    width: 100%;
+    max-width: 480px;
+    padding: 30px 20px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
 }
 
-/* TIME GRID ΜΕ SCROLL */
+h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    color: #0f172a;
+}
+
+#display-shop-name {
+    color: #2563eb;
+    font-weight: 800;
+}
+
+/* Πεδία Εισαγωγής */
+.input-field {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Επιλογέας Ατόμων */
+.guests-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.guests-selector button {
+    width: 45px;
+    height: 45px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    font-size: 1.8rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.guests-selector button:hover {
+    background: #1d4ed8;
+}
+
+#guests-count {
+    font-size: 1.3rem;
+    color: #2563eb;
+}
+
+/* Λίστα Ωρών (Time Grid) */
 .time-grid {
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 10px; 
-    margin-top: 10px;
-    max-height: 200px; /* Περιορισμός ύψους */
-    overflow-y: auto; /* Scrollbar αν χρειάζεται */
-    padding: 5px;
-    border: 1px solid #f1f5f9;
-    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
 }
 
-.time-slot {
-    padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0;
-    border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+.time-btn {
+    padding: 12px;
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.time-slot.selected {
-    background: var(--primary); color: white; border-color: var(--primary);
+.time-btn:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    background: #f0f9ff;
 }
 
-/* MODAL */
+/* Το Modal (Παράθυρο Ολοκλήρωσης) */
 .modal {
-    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-    width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px); align-items: center; justify-content: center;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px); /* Εφέ θολούρας πίσω */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.modal-content { width: 90%; max-width: 380px; }
-
-.btn-primary {
-    width: 100%; padding: 14px; background: var(--primary);
-    color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
+.modal-content {
+    background: white;
+    width: 90%;
+    max-width: 420px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    animation: slideIn 0.3s ease-out; /* Εφέ εμφάνισης */
 }
 
-.btn-link {
-    background: none; border: none; color: #64748b; width: 100%; margin-top: 10px; cursor: pointer;
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+#summary-text {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+/* Κουμπιά Modal */
+#confirm-btn {
+    flex: 2;
+    padding: 14px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#confirm-btn:hover {
+    background: #1d4ed8;
+}
+
+#close-modal {
+    flex: 1;
+    padding: 14px;
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Responsive για Κινητά */
+@media (max-width: 500px) {
+    .container { padding: 20px 15px; border-radius: 15px; }
+    h2 { font-size: 1.3rem; }
+    .input-field { font-size: 0.9rem; }
+    .guests-selector { font-size: 1rem; padding: 10px; }
 }
