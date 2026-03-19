@@ -190,3 +190,209 @@ h2 {
     .input-field { font-size: 0.9rem; }
     .guests-selector { font-size: 1rem; padding: 10px; }
 }
+/* admin-style.css */
+
+/* Βασικές Ρυθμίσεις */
+* {
+    box-sizing: border-box;
+    margin: 0; padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f8fafc;
+    color: #1e293b;
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Κεντρικό Container (Card) */
+.container {
+    background: white;
+    width: 100%;
+    max-width: 550px;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+/* Ενότητα Login */
+#login-section {
+    text-align: center;
+}
+
+#login-section h3 { margin-bottom: 15px; }
+
+.input-field {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+}
+
+/* Ενότητα Dashboard */
+#dashboard h3 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#shop-title { color: #2563eb; }
+
+/* Φίλτρα Ημερομηνίας */
+.filters {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filters label { font-size: 0.8rem; font-weight: 600; color: #64748b; }
+
+.filters input[type="date"] {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+/* Στατιστικά (Stats Bar) */
+#stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat-box {
+    flex: 1;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    color: white;
+}
+
+.stat-box.primary { background: #2563eb; }
+.stat-box.dark { background: #0f172a; }
+
+.stat-box .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-box .value { font-size: 1.8rem; font-weight: 800; }
+
+/* Οι Κάρτες των Κρατήσεων (res-card) */
+.reservation-list {
+    margin-top: 15px;
+}
+
+.res-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 15px;
+    border-left: 6px solid #2563eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.res-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Λεπτομέρειες Κάρτας */
+.res-time {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #2563eb;
+}
+
+.res-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-left: 10px;
+}
+
+.res-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #1e293b;
+    margin: 8px 0;
+}
+
+.res-meta {
+    font-size: 0.9rem;
+    color: #475569;
+}
+
+.res-meta strong { color: #1e293b; }
+
+.res-occasion {
+    margin-top: 10px;
+    color: #db2777;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.res-comments {
+    margin-top: 10px;
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.res-call {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.call-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Κουμπί Διαγραφής (❌) */
+.delete-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #ef4444;
+}
+
+/* Responsive για Κινητά */
+@media (max-width: 500px) {
+    .container { padding: 15px; }
+    #dashboard h3 { font-size: 1.1rem; flex-direction: column; gap: 5px; align-items: flex-start; }
+    .stat-box .value { font-size: 1.5rem; }
+    .res-card { padding: 15px; }
+}
