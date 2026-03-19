@@ -71,16 +71,3 @@ document.getElementById('btn-save').onclick = () => {
         location.reload();
     });
 };
-        name, phone, guests, date, time, 
-        location, occasion, comments,
-        timestamp: Date.now()
-    }).then(() => {
-        alert("Η κράτησή σας ολοκληρώθηκε με επιτυχία!");
-        window.location.reload();
-    }).catch(err => alert("Σφάλμα κατά την κράτηση."));
-};
-
-// Λογική για το κλείσιμο του modal
-document.getElementById('close-modal').onclick = () => {
-    document.getElementById('booking-modal').style.display = 'none';
-};
