@@ -13,28 +13,88 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
+let allReservations = [];
 
-let allReservations = []; 
-
-// --- ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ & URL ---
-// --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ (AUTH + URL MATCH) ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // 1. Παίρνουμε το shop από το URL
         const urlParams = new URLSearchParams(window.location.search);
         const urlShop = urlParams.get('shop');
 
-        // 2. Αν δεν υπάρχει shop στο URL, τον πετάμε έξω αμέσως
         if (!urlShop) {
-            alert("ΣΦΑΛΜΑ: Δεν έχει οριστεί κατάστημα στο URL!");
-            signOut(auth);
-            return;
+            alert("Λείπει το όνομα του καταστήματος από το URL!");
+            signOut(auth); return;
         }
 
-        // 3. Τσεκάρουμε στη βάση αν αυτό το UID επιτρέπεται να μπει στο συγκεκριμένο shop του URL
         const snapshot = await get(ref(db, 'users_to_shops/' + user.uid));
-        
+        if (snapshot.exists() && snapshot.val() === urlShop) {
+            const myShop = snapshot.val();
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('shop-title').innerText = myShop;
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filter-from').value = today;
+            document.getElementById('filter-to').value = today;
+
+            listenToReservations(myShop);
+        } else {
+            alert("Δεν έχετε δικαίωμα πρόσβασης για αυτό το URL!");
+            signOut(auth);
+        }
+    } else {
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('dashboard').style.display = 'none';
+    }
+});
+
+function listenToReservations(shop) {
+    onValue(ref(db, 'reservations/' + shop), (snapshot) => {
+        allReservations = [];
         if (snapshot.exists()) {
+            const data = snapshot.val();
+            allReservations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        }
+        renderDashboard(shop);
+    });
+}
+
+function renderDashboard(shop) {
+    const from = document.getElementById('filter-from').value;
+    const to = document.getElementById('filter-to').value;
+    const list = document.getElementById('reservation-list');
+    
+    let filtered = allReservations.filter(res => res.date >= from && res.date <= to);
+    filtered.sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+    let totalGuests = 0;
+    filtered.forEach(res => totalGuests += parseInt(res.guests || 0));
+    document.getElementById('stat-count').innerText = filtered.length;
+    document.getElementById('stat-guests').innerText = totalGuests;
+
+    list.innerHTML = "";
+    filtered.forEach(res => {
+        const div = document.createElement('div');
+        div.className = "booking-item card";
+        div.style = "margin-bottom:15px; border-left:6px solid #2563eb; padding:15px; background:white;";
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:800; color:#2563eb;">${res.time} (${res.date})</span>
+                <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:red; border:none; background:none; cursor:pointer;">❌</button>
+            </div>
+            <div style="margin-top:5px;">
+                <strong>${res.name}</strong> - ${res.guests} άτομα<br>
+                <small>📍 ${res.location}</small>
+                ${res.occasion ? `<div style="color:#db2777; font-weight:bold;">🎉 ${res.occasion}</div>` : ''}
+                ${res.comments ? `<div style="background:#f1f5f9; padding:5px; margin-top:5px; font-size:0.85rem;">💬 ${res.comments}</div>` : ''}
+                <div style="margin-top:5px;">📞 <a href="tel:${res.phone}">${res.phone}</a></div>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// ... οι υπόλοιπες συναρτήσεις (login, logout, delete) παραμένουν ίδιες ...
+// (Πρόσθεσε εδώ τα btn-login.onclick, btn-logout.onclick και window.deleteBooking από το προηγούμενο μήνυμα)        if (snapshot.exists()) {
             const myAssignedShop = snapshot.val(); // Τι λέει η βάση για αυτόν τον χρήστη
 
             // 4. Η ΚΡΙΣΙΜΗ ΔΙΑΣΤΑΥΡΩΣΗ:
