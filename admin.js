@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getDatabase, ref, onValue, get, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-// Ρυθμίσεις Firebase (Οι δικές σου)
 const firebaseConfig = {
     apiKey: "AIzaSyCEkDMQ2Q3N886s8SyG03p6ZgzwO3N4pX4",
     authDomain: "reser-dfb9a.firebaseapp.com",
@@ -15,84 +14,105 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-// --- ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ (AUTH) ---
+let allReservations = []; // Εδώ θα κρατάμε τα δεδομένα για να τα φιλτράρουμε
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
-        // 1. Μόλις συνδεθεί, τσεκάρουμε στη βάση ποιο μαγαζί του ανήκει
-        const userMappingRef = ref(db, 'users_to_shops/' + user.uid);
-        const snapshot = await get(userMappingRef);
-
+        const snapshot = await get(ref(db, 'users_to_shops/' + user.uid));
         if (snapshot.exists()) {
-            // Αν το UID υπάρχει στη λίστα "users_to_shops"
-            const myAssignedShop = snapshot.val(); 
-            
+            const myShop = snapshot.val();
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
-            document.getElementById('shop-title').innerText = myAssignedShop;
+            document.getElementById('shop-title').innerText = myShop;
+            
+            // Ορίζουμε σημερινή ημερομηνία στα φίλτρα ως προεπιλογή
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filter-from').value = today;
+            document.getElementById('filter-to').value = today;
 
-            // 2. Φορτώνουμε ΜΟΝΟ τις κρατήσεις αυτού του μαγαζιού
-            loadReservations(myAssignedShop);
+            listenToReservations(myShop);
         } else {
-            // Αν το UID ΔΕΝ υπάρχει στη λίστα, τον πετάμε έξω αμέσως
-            alert("ΠΡΟΣΒΑΣΗ ΔΕΝ ΕΠΙΤΡΕΠΕΤΑΙ: Ο λογαριασμός σας δεν είναι συνδεδεμένος με κάποιο κατάστημα.");
-            signOut(auth); 
+            signOut(auth);
         }
     } else {
-        // Αν είναι αποσυνδεδεμένος, δείχνουμε τη φόρμα Login
         document.getElementById('login-section').style.display = 'block';
         document.getElementById('dashboard').style.display = 'none';
     }
 });
 
-// --- ΦΟΡΤΩΣΗ ΚΡΑΤΗΣΕΩΝ ---
-function loadReservations(shop) {
-    const resRef = ref(db, 'reservations/' + shop);
-    
-    onValue(resRef, (snapshot) => {
-        const list = document.getElementById('reservation-list');
-        list.innerHTML = "";
-        const data = snapshot.val();
-        
-        if (data) {
-            // Μετατρέπουμε σε πίνακα και ταξινομούμε (νέα πάνω)
-            Object.keys(data).reverse().forEach(key => {
-                const b = data[key];
-                const div = document.createElement('div');
-                div.className = "booking-item";
-                div.style = "background: #f8fafc; padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 4px solid #2563eb; position: relative;";
-                
-                div.innerHTML = `
-                    <strong>👤 ${b.name}</strong> (${b.guests} άτομα)<br>
-                    📞 <a href="tel:${b.phone}">${b.phone}</a><br>
-                    📅 ${b.date} | ⏰ ${b.time}<br>
-                    <button onclick="deleteBooking('${shop}', '${key}')" style="margin-top:10px; color:red; border:none; background:none; cursor:pointer; font-weight:bold;">❌ Διαγραφή</button>
-                `;
-                list.appendChild(div);
-            });
-        } else { 
-            list.innerHTML = "<p>Δεν υπάρχουν κρατήσεις για αυτό το κατάστημα.</p>"; 
+function listenToReservations(shop) {
+    onValue(ref(db, 'reservations/' + shop), (snapshot) => {
+        allReservations = [];
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            allReservations = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         }
+        renderDashboard(shop);
     });
 }
 
-// --- ΣΥΝΑΡΤΗΣΕΙΣ LOGIN / LOGOUT ---
+// Συνάρτηση που "σχεδιάζει" τη λίστα και τα στατιστικά
+function renderDashboard(shop) {
+    const fromDate = document.getElementById('filter-from').value;
+    const toDate = document.getElementById('filter-to').value;
+    const list = document.getElementById('reservation-list');
+    
+    // 1. Φιλτράρισμα βάσει ημερομηνίας
+    let filtered = allReservations.filter(res => {
+        return res.date >= fromDate && res.date <= toDate;
+    });
+
+    // 2. Ταξινόμηση: Πρώτα η Ημερομηνία και μετά η Ώρα (από νωρίς προς αργά)
+    filtered.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.time.localeCompare(b.time);
+    });
+
+    // 3. Υπολογισμός Στατιστικών
+    let totalGuests = 0;
+    filtered.forEach(res => totalGuests += parseInt(res.guests || 0));
+    
+    document.getElementById('stat-count').innerText = filtered.length;
+    document.getElementById('stat-guests').innerText = totalGuests;
+
+    // 4. Εμφάνιση Λίστας
+    list.innerHTML = "";
+    if (filtered.length === 0) {
+        list.innerHTML = "<p style='text-align:center; color:#64748b;'>Καμία κράτηση για αυτό το εύρος.</p>";
+        return;
+    }
+
+    filtered.forEach(res => {
+        const div = document.createElement('div');
+        div.className = "booking-item card";
+        div.style = "margin-bottom:10px; border-left:5px solid #2563eb; padding:12px; background:white;";
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between;">
+                <span style="font-weight:800; color:#2563eb;">${res.time}</span>
+                <span style="font-size:0.8rem; color:#64748b;">${res.date}</span>
+            </div>
+            <div style="margin-top:5px;">
+                <strong>${res.name}</strong> (${res.guests} άτομα)<br>
+                <small>📞 ${res.phone}</small>
+            </div>
+            <button onclick="deleteBooking('${shop}', '${res.id}')" style="margin-top:8px; color:#ef4444; border:none; background:none; cursor:pointer; font-size:0.8rem;">Διαγραφή</button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// Event Listeners για τα φίλτρα
+document.getElementById('filter-from').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
+document.getElementById('filter-to').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
+
 document.getElementById('btn-login').onclick = () => {
     const email = document.getElementById('email').value;
     const pass = document.getElementById('pass').value;
-    
-    if(!email || !pass) return alert("Συμπληρώστε Email και Κωδικό");
-    
-    signInWithEmailAndPassword(auth, email, pass)
-        .catch((error) => alert("Λάθος στοιχεία πρόσβασης!"));
+    signInWithEmailAndPassword(auth, email, pass).catch(() => alert("Λάθος στοιχεία!"));
 };
 
-document.getElementById('btn-logout').onclick = () => {
-    signOut(auth);
-};
+document.getElementById('btn-logout').onclick = () => signOut(auth);
 
-// --- ΔΙΑΓΡΑΦΗ ΚΡΑΤΗΣΗΣ ---
 window.deleteBooking = (shop, id) => {
-    if(confirm("Θέλετε σίγουρα να διαγράψετε αυτή την κράτηση;")) {
-        remove(ref(db, `reservations/${shop}/${id}`));
-    }
+    if(confirm("Διαγραφή κράτησης;")) remove(ref(db, `reservations/${shop}/${id}`));
 };
