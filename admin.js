@@ -92,35 +92,34 @@ function renderDashboard(shop) {
         return;
     }
 
-    filtered.forEach(res => {
-        const div = document.createElement('div');
-        div.className = "booking-item card";
-        div.style = "margin-bottom:12px; border-left:6px solid #2563eb; padding:15px; background:white; position:relative; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-radius:8px;";
-        
-        // ΕΜΦΑΝΙΣΗ ΝΕΩΝ ΣΤΟΙΧΕΙΩΝ ΣΤΗΝ ΚΑΡΤΑ
-        div.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div>
-                    <span style="font-size:1.1rem; font-weight:800; color:#2563eb;">${res.time}</span>
-                    <span style="font-size:0.8rem; color:#94a3b8; margin-left:10px;">${res.date}</span>
-                </div>
-                <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:#ef4444; border:none; background:none; cursor:pointer; font-size:0.8rem;">Διαγραφή</button>
+// Στο renderDashboard(shop) του admin.js:
+filtered.forEach(res => {
+    const div = document.createElement('div');
+    div.className = "booking-item card";
+    div.style = "margin-bottom:20px; border-left:8px solid #2563eb; padding:20px; background:white; position:relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05);";
+    
+    div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:10px;">
+            <div>
+                <span style="font-size:1.4rem; font-weight:900; color:#2563eb;">${res.time}</span>
+                <span style="font-size:0.9rem; color:#94a3b8; margin-left:12px;">${res.date}</span>
             </div>
-            <div style="margin-top:8px;">
-                <div style="font-weight:700; font-size:1rem;">${res.name}</div>
-                <div style="color:#475569; font-size:0.9rem;">
-                    👥 ${res.guests} άτομα | 📍 ${res.location || 'Εσωτερικός'}
-                </div>
-                
-                ${res.occasion ? `<div style="color:#db2777; font-weight:700; font-size:0.85rem; margin-top:4px;">🎉 ${res.occasion}</div>` : ''}
-                ${res.comments ? `<div style="background:#f1f5f9; padding:8px; border-radius:6px; font-size:0.85rem; margin-top:6px; font-style:italic; color:#334155;">💬 ${res.comments}</div>` : ''}
-                
-                <div style="color:#2563eb; font-size:0.9rem; margin-top:8px; font-weight:600;">📞 <a href="tel:${res.phone}" style="text-decoration:none; color:inherit;">${res.phone}</a></div>
+            <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:#ef4444; border:1px solid #fee2e2; background:#fef2f2; padding:5px 12px; border-radius:6px; cursor:pointer; font-weight:700;">Διαγραφή</button>
+        </div>
+        <div>
+            <div style="font-weight:800; font-size:1.2rem; color:#1e293b;">${res.name}</div>
+            <div style="color:#475569; font-size:1rem; margin-top:5px;">
+                👥 <strong>${res.guests} άτομα</strong> | 📍 ${res.location || 'Εσωτερικός'}
             </div>
-        `;
-        list.appendChild(div);
-    });
-}
+            ${res.occasion ? `<div style="color:#db2777; font-weight:700; font-size:0.9rem; margin-top:8px; background:#fdf2f8; display:inline-block; padding:2px 8px; border-radius:4px;">🎉 ${res.occasion}</div>` : ''}
+            ${res.comments ? `<div style="background:#f8fafc; padding:12px; border-radius:8px; font-size:0.9rem; margin-top:10px; border:1px solid #e2e8f0; color:#334155;">💬 ${res.comments}</div>` : ''}
+            <div style="margin-top:15px;">
+                <a href="tel:${res.phone}" style="text-decoration:none; background:#2563eb; color:white; padding:8px 15px; border-radius:8px; font-weight:700; display:inline-block;">📞 Κλήση: ${res.phone}</a>
+            </div>
+        </div>
+    `;
+    list.appendChild(div);
+});
 
 document.getElementById('filter-from').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
 document.getElementById('filter-to').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
