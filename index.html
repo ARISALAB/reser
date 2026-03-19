@@ -42,31 +42,25 @@
         </main>
     </div>
 
-  <div id="booking-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000;">
-    <div class="modal-content" style="background:white; margin:10% auto; padding:20px; width:90%; max-width:400px; border-radius:15px; position:relative;">
-        <h3 style="margin-top:0;">Ολοκλήρωση Κράτησης</h3>
-        <p id="summary-text" style="font-size:0.9rem; color:#475569;"></p>
-
-        <input type="text" id="cust-name" placeholder="Ονοματεπώνυμο" class="input-field" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;">
-        <input type="tel" id="cust-phone" placeholder="Τηλέφωνο (π.χ. 69...) " class="input-field" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;">
-
-        <label style="font-size:0.8rem; font-weight:bold; display:block; margin-bottom:5px;">Πού προτιμάτε να καθίσετε;</label>
-        <select id="seating-location" class="input-field" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;">
-            <option value="Εσωτερικός Χώρος">Εσωτερικός Χώρος</option>
-            <option value="Εξωτερικός Χώρος">Εξωτερικός Χώρος</option>
-            <option value="Δεν έχω προτίμηση">Δεν έχω προτίμηση</option>
-        </select>
-
-        <input type="text" id="special-occasion" placeholder="Ειδικό Γεγονός (π.χ. Γενέθλια)" class="input-field" style="width:100%; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:8px;">
-        
-        <textarea id="additional-comments" placeholder="Επιπλέον αιτήματα (π.χ. Παιδικό κάθισμα)" class="input-field" rows="2" style="width:100%; margin-bottom:15px; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
-
-        <div style="display:flex; gap:10px;">
-            <button id="confirm-btn" style="flex:1; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Επιβεβαίωση</button>
-            <button id="close-modal" style="flex:1; padding:12px; background:#f1f5f9; color:#475569; border:none; border-radius:8px; cursor:pointer;">Ακύρωση</button>
+    <div id="booking-modal" class="modal">
+        <div class="modal-content card">
+            <h3>Στοιχεία Επικοινωνίας</h3>
+            <div class="input-group">
+                <label>Ονοματεπώνυμο</label>
+                <input type="text" id="cust-name" placeholder="π.χ. Γιώργος Παππάς">
+            </div>
+            <div class="input-group">
+                <label>Τηλέφωνο</label>
+                <input type="tel" id="cust-phone" placeholder="69XXXXXXXX">
+            </div>
+            <div class="input-group">
+                <label>Email (Προαιρετικό)</label>
+                <input type="email" id="cust-email" placeholder="mail@example.com">
+            </div>
+            <button class="btn-primary" id="btn-save">Ολοκλήρωση Κράτησης</button>
+            <button class="btn-link" id="close-modal">Αλλαγή ώρας</button>
         </div>
     </div>
-</div>
 
     <script type="module" src="client.js"></script>
 </body>
