@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// Ρυθμίσεις Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyCEkDMQ2Q3N886s8SyG03p6ZgzwO3N4pX4",
     authDomain: "reser-dfb9a.firebaseapp.com",
@@ -12,10 +11,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
-// Ρυθμίσεις Telegram (Με τα δικά σου στοιχεία)
-const telegramToken = "8738423907:AAG7kflGAD3fEtyLIe--AgJhIkEI7nOXS0w";
-const chatId = "8145219232"; // Το Chat ID σου από το screenshot
 
 const urlParams = new URLSearchParams(window.location.search);
 const shopID = urlParams.get('shop') || "default_store";
@@ -60,20 +55,6 @@ document.getElementById('open-modal').onclick = () => {
 };
 document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
 
-// ΣΥΝΑΡΤΗΣΗ ΕΙΔΟΠΟΙΗΣΗΣ TELEGRAM
-async function sendTelegramNotification(data) {
-    const message = `🔔 *Νέα Κράτηση!*\n📍 Μαγαζί: *${shopID}*\n👤 Πελάτης: ${data.name}\n📞 Τηλέφωνο: ${data.phone}\n👥 Άτομα: ${data.guests}\n📅 Ημερομηνία: ${data.date}\n⏰ Ώρα: ${data.time}\n📧 Email: ${data.email || '---'}`;
-
-    try {
-        await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
-        });
-    } catch (e) { console.error("Telegram error", e); }
-}
-
-// ΑΠΟΘΗΚΕΥΣΗ ΚΑΙ ΕΙΔΟΠΟΙΗΣΗ
 document.getElementById('btn-save').onclick = () => {
     const name = document.getElementById('cust-name').value;
     const phone = document.getElementById('cust-phone').value;
@@ -86,8 +67,7 @@ document.getElementById('btn-save').onclick = () => {
     const bookingData = { name, phone, email, date, time: selectedTime, guests, timestamp: Date.now() };
 
     set(push(ref(db, 'reservations/' + shopID)), bookingData).then(() => {
-        sendTelegramNotification(bookingData);
-        alert("Η κράτηση στάλθηκε! Δες το Telegram σου!");
+        alert("Επιτυχία! Η κράτηση αποθηκεύτηκε.");
         location.reload();
     });
 };
