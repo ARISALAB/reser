@@ -1,80 +1,29 @@
-:root {
-    --primary: #2563eb;
-    --dark: #0f172a;
-    --bg: #f8fafc;
-    --white: #ffffff;
-    --radius: 12px;
-}
+// ... (το υπόλοιπο client.js παραμένει ίδιο) ...
 
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg);
-    margin: 0; display: flex; justify-content: center; padding: 20px;
-}
+document.getElementById('btn-save').onclick = () => {
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const email = document.getElementById('cust-email').value;
+    const date = document.getElementById('cust-date-only').value;
+    const guests = document.getElementById('cust-guests').value;
+    const locationChoice = document.getElementById('cust-location').value;
+    const occasion = document.getElementById('cust-occasion').value;
+    const comments = document.getElementById('cust-comments').value;
 
-.app-container { width: 100%; max-width: 420px; }
+    if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
 
-header { text-align: center; margin-bottom: 20px; }
-header h1 span { color: var(--primary); }
+    const bookingData = { 
+        name, phone, email, date, 
+        time: selectedTime, guests, 
+        location: locationChoice,
+        occasion,
+        comments,
+        timestamp: Date.now() 
+    };
 
-.card {
-    background: var(--white);
-    padding: 20px;
-    border-radius: var(--radius);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-}
-
-.input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
-label { font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: var(--dark); }
-
-input, select { 
-    padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 1rem; outline: none;
-}
-
-/* TIME GRID ΜΕ SCROLL */
-.time-grid {
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 10px; 
-    margin-top: 10px;
-    max-height: 200px; /* Περιορισμός ύψους */
-    overflow-y: auto; /* Scrollbar αν χρειάζεται */
-    padding: 5px;
-    border: 1px solid #f1f5f9;
-    border-radius: 8px;
-}
-
-.time-slot {
-    padding: 10px; background: #f1f5f9; border: 1px solid #e2e8f0;
-    border-radius: 8px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.9rem;
-}
-
-.time-slot.selected {
-    background: var(--primary); color: white; border-color: var(--primary);
-}
-
-/* MODAL */
-.modal {
-    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-    width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(4px); align-items: center; justify-content: center;
-}
-
-.modal-content { width: 90%; max-width: 380px; }
-
-.btn-primary {
-    width: 100%; padding: 14px; background: var(--primary);
-    color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;
-}
-
-.btn-link {
-    background: none; border: none; color: #64748b; width: 100%; margin-top: 10px; cursor: pointer;
-}
-
-/* Responsive για Κινητά */
-@media (max-width: 500px) {
-    .container { padding: 15px; }
-    #dashboard h3 { font-size: 1.1rem; flex-direction: column; gap: 5px; align-items: flex-start; }
-    .stat-box .value { font-size: 1.5rem; }
-    .res-card { padding: 15px; }
-}
+    set(push(ref(db, 'reservations/' + shopID)), bookingData).then(() => {
+        alert("Επιτυχία! Η κράτηση αποθηκεύτηκε.");
+        // Επιστροφή στην αρχική σελίδα του μαγαζιού (καθαρίζει το modal και τις επιλογές)
+        window.location.href = window.location.pathname + "?shop=" + shopID;
+    });
+};
