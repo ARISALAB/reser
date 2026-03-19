@@ -3,37 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Κράτηση Τραπεζιού</title>
-    <link rel="stylesheet" href="style.css"> <style>
-        .input-group { margin-bottom: 15px; }
-        .input-field { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #333; }
-        textarea.input-field { resize: vertical; }
-    </style>
+    <title>TableRes | Σύστημα Κρατήσεων</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h2 id="display-shop-name">Φόρτωση...</h2>
-        
-        <div id="booking-form">
+
+    <div class="app-container">
+        <header>
+            <h1>Table<span>Res</span></h1>
+            <p id="shop-display">Φόρτωση...</p>
+        </header>
+
+        <main class="card">
             <div class="input-group">
-                <label>Όνομα</label>
-                <input type="text" id="name" class="input-field" placeholder="Το όνομά σας">
+                <label>1. Ημερομηνία</label>
+                <input type="date" id="cust-date-only">
+            </div>
+
+            <div class="input-group">
+                <label>2. Άτομα</label>
+                <input type="number" id="cust-guests" value="2" min="1" max="20">
+            </div>
+
+            <div class="input-group">
+                <label>3. Επιλογή Ώρας</label>
+                <select id="time-select">
+                    <option value="">Επιλέξτε ώρα...</option>
+                </select>
+            </div>
+
+            <label style="font-size: 0.85rem; font-weight: 600;">Ή πατήστε ένα slot:</label>
+            <div id="time-slots-container" class="time-grid"></div>
+
+            <button class="btn-primary" id="open-modal" style="margin-top: 25px; display:none;">
+                Συνέχεια Κράτησης
+            </button>
+        </main>
+    </div>
+
+    <div id="booking-modal" class="modal">
+        <div class="modal-content card">
+            <h3>Στοιχεία Επικοινωνίας</h3>
+            <div class="input-group">
+                <label>Ονοματεπώνυμο</label>
+                <input type="text" id="cust-name" placeholder="π.χ. Γιώργος Παππάς">
             </div>
             <div class="input-group">
                 <label>Τηλέφωνο</label>
-                <input type="tel" id="phone" class="input-field" placeholder="69XXXXXXXX">
+                <input type="tel" id="cust-phone" placeholder="69XXXXXXXX">
             </div>
             <div class="input-group">
-                <label>Άτομα</label>
-                <input type="number" id="guests" class="input-field" value="2" min="1">
+                <label>Email (Προαιρετικό)</label>
+                <input type="email" id="cust-email" placeholder="mail@example.com">
             </div>
-            <div class="input-group">
-                <label>Ημερομηνία</label>
-                <input type="date" id="date" class="input-field">
-            </div>
-            <div id="time-slots" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:15px;">
-                </div>
+            <button class="btn-primary" id="btn-save">Ολοκλήρωση Κράτησης</button>
+            <button class="btn-link" id="close-modal">Αλλαγή ώρας</button>
+        </div>
+    </div>
+
+    <script type="module" src="client.js"></script>
+</body>
+</html>
 
             <div class="input-group">
                 <label>Πού προτιμάτε να καθίσετε;</label>
