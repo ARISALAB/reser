@@ -25,12 +25,32 @@
             <button class="btn-primary" id="btn-login">Είσοδος</button>
         </div>
 
-        <div id="dashboard" class="card" style="display:none;">
-            <h3>Κρατήσεις: <span id="shop-title"></span></h3>
-            <div id="reservation-list">Φόρτωση...</div>
-            <button class="btn-outline" id="btn-logout">Έξοδος</button>
+<div id="dashboard" class="card" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>Κρατήσεις: <span id="shop-title"></span></h3>
+        <button class="btn-outline" id="btn-logout" style="padding:5px 10px; font-size:0.8rem;">Έξοδος</button>
+    </div>
+
+    <div class="filters card" style="background:#f1f5f9; margin-bottom:15px; padding:15px;">
+        <label style="font-size:0.8rem;">Από:</label>
+        <input type="date" id="filter-from" style="margin-bottom:10px;">
+        <label style="font-size:0.8rem;">Έως:</label>
+        <input type="date" id="filter-to">
+    </div>
+
+    <div id="stats" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div class="card" style="text-align:center; background:#2563eb; color:white; padding:10px;">
+            <div style="font-size:0.8rem;">Κρατήσεις</div>
+            <div id="stat-count" style="font-size:1.5rem; font-weight:800;">0</div>
+        </div>
+        <div class="card" style="text-align:center; background:#0f172a; color:white; padding:10px;">
+            <div style="font-size:0.8rem;">Σύνολο Ατόμων</div>
+            <div id="stat-guests" style="font-size:1.5rem; font-weight:800;">0</div>
         </div>
     </div>
+
+    <div id="reservation-list">Φόρτωση...</div>
+</div>
     <script type="module" src="admin.js"></script>
 </body>
 </html>
