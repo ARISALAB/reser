@@ -1,16 +1,20 @@
 :root {
     --primary: #2563eb;
-    --bg: #f1f5f9;
+    --primary-light: #dbeafe;
+
+    --bg: #f8fafc;
     --surface: #ffffff;
+
     --text: #0f172a;
     --muted: #64748b;
+
     --border: #e2e8f0;
 
-    --radius: 14px;
-    --shadow: 0 10px 30px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-/* Reset */
+/* RESET */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -23,75 +27,79 @@ body {
     color: var(--text);
 }
 
-/* 🧱 MAIN LAYOUT */
+/* 🧱 LAYOUT */
 .app-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 100vh;
+    grid-template-columns: 320px 1fr;
+    height: 100vh;
 }
 
-/* LEFT SIDE (form) */
-.left-panel {
-    padding: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+/* 📅 SIDEBAR (Calendar / Info) */
+.sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 30px;
 }
 
-/* RIGHT SIDE (preview / bookings) */
-.right-panel {
-    background: #0f172a;
+.sidebar h2 {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+}
+
+/* fake calendar style */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.day {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.day:hover {
+    background: var(--primary-light);
+}
+
+.day.active {
+    background: var(--primary);
     color: white;
-    padding: 60px;
 }
 
-/* HEADER */
+/* 🧾 MAIN */
+.main {
+    padding: 40px;
+    overflow-y: auto;
+}
+
+header {
+    margin-bottom: 30px;
+}
+
 header h1 {
-    font-size: 2.8rem;
-    margin-bottom: 10px;
-}
-
-header p {
-    color: var(--muted);
-    margin-bottom: 40px;
+    font-size: 2rem;
 }
 
 /* CARD */
 .card {
     background: var(--surface);
-    padding: 30px;
+    padding: 25px;
     border-radius: var(--radius);
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
 }
 
-/* FORM */
-.input-group {
-    margin-bottom: 20px;
-}
-
-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--muted);
-    margin-bottom: 6px;
-    display: block;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    font-size: 0.95rem;
-}
-
-/* GRID TIMES */
+/* TIME SLOTS */
 .time-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin: 20px 0;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
 }
 
 .time-slot {
@@ -102,6 +110,12 @@ input, select {
     cursor: pointer;
     font-weight: 600;
     background: white;
+    transition: 0.2s;
+}
+
+.time-slot:hover {
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .time-slot.selected {
@@ -109,8 +123,32 @@ input, select {
     color: white;
 }
 
+/* FORM */
+.form {
+    margin-top: 30px;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 6px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
 /* BUTTON */
 .btn-primary {
+    margin-top: 10px;
     width: 100%;
     padding: 14px;
     background: var(--primary);
@@ -119,23 +157,11 @@ input, select {
     border-radius: var(--radius);
     font-weight: bold;
     cursor: pointer;
+    transition: 0.2s;
 }
 
-/* RIGHT PANEL CONTENT */
-.booking-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.booking-item {
-    background: rgba(255,255,255,0.05);
-    padding: 20px;
-    border-radius: 12px;
-}
-
-.booking-item strong {
-    font-size: 1.2rem;
+.btn-primary:hover {
+    background: #1e40af;
 }
 
 /* 📱 MOBILE */
@@ -144,11 +170,8 @@ input, select {
         grid-template-columns: 1fr;
     }
 
-    .right-panel {
-        display: none;
-    }
-
-    .left-panel {
-        padding: 30px 20px;
+    .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
     }
 }
