@@ -16,32 +16,41 @@ const auth = getAuth(app);
 
 let allReservations = []; 
 
+// --- ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ & URL ---
+// --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ ΠΡΟΣΒΑΣΗΣ (AUTH + URL MATCH) ---
 onAuthStateChanged(auth, async (user) => {
     if (user) {
+        // 1. Παίρνουμε το shop από το URL
         const urlParams = new URLSearchParams(window.location.search);
         const urlShop = urlParams.get('shop');
 
+        // 2. Αν δεν υπάρχει shop στο URL, τον πετάμε έξω αμέσως
         if (!urlShop) {
             alert("ΣΦΑΛΜΑ: Δεν έχει οριστεί κατάστημα στο URL!");
             signOut(auth);
             return;
         }
 
+        // 3. Τσεκάρουμε στη βάση αν αυτό το UID επιτρέπεται να μπει στο συγκεκριμένο shop του URL
         const snapshot = await get(ref(db, 'users_to_shops/' + user.uid));
         
         if (snapshot.exists()) {
-            const myAssignedShop = snapshot.val(); 
+            const myAssignedShop = snapshot.val(); // Τι λέει η βάση για αυτόν τον χρήστη
 
+            // 4. Η ΚΡΙΣΙΜΗ ΔΙΑΣΤΑΥΡΩΣΗ:
+            // Αν αυτό που λέει το URL ΔΕΝ είναι αυτό που επιτρέπει η βάση για αυτόν τον χρήστη
             if (urlShop !== myAssignedShop) {
                 alert("ΑΠΑΓΟΡΕΥΕΤΑΙ: Δεν έχετε δικαιώματα πρόσβασης για το κατάστημα: " + urlShop);
-                signOut(auth);
+                signOut(auth); // Τον αποσυνδέουμε αναγκαστικά
                 return;
             }
 
+            // ΑΝ ΟΛΑ ΕΙΝΑΙ ΣΩΣΤΑ (Το UID ταιριάζει με το Shop του URL)
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard').style.display = 'block';
             document.getElementById('shop-title').innerText = myAssignedShop;
             
+            // Προεπιλογή ημερομηνίας
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('filter-from').value = today;
             document.getElementById('filter-to').value = today;
@@ -56,7 +65,7 @@ onAuthStateChanged(auth, async (user) => {
         document.getElementById('dashboard').style.display = 'none';
     }
 });
-
+// --- ΣΥΝΔΕΣΗ ΜΕ ΤΗ ΒΑΣΗ (REAL-TIME) ---
 function listenToReservations(shop) {
     onValue(ref(db, 'reservations/' + shop), (snapshot) => {
         allReservations = [];
@@ -68,59 +77,58 @@ function listenToReservations(shop) {
     });
 }
 
+// --- ΣΧΕΔΙΑΣΗ ΛΙΣΤΑΣ & ΣΤΑΤΙΣΤΙΚΩΝ ---
 function renderDashboard(shop) {
     const fromDate = document.getElementById('filter-from').value;
     const toDate = document.getElementById('filter-to').value;
     const list = document.getElementById('reservation-list');
     
+    // 1. Φιλτράρισμα
     let filtered = allReservations.filter(res => res.date >= fromDate && res.date <= toDate);
 
+    // 2. Ταξινόμηση (Πρώτα η ημερομηνία, μετά η ώρα)
     filtered.sort((a, b) => {
         if (a.date !== b.date) return a.date.localeCompare(b.date);
         return a.time.localeCompare(b.time);
     });
 
+    // 3. Στατιστικά
     let totalGuests = 0;
     filtered.forEach(res => totalGuests += parseInt(res.guests || 0));
     
     document.getElementById('stat-count').innerText = filtered.length;
     document.getElementById('stat-guests').innerText = totalGuests;
 
+    // 4. Εμφάνιση
     list.innerHTML = "";
     if (filtered.length === 0) {
         list.innerHTML = "<p style='text-align:center; padding:20px; color:#64748b;'>Καμία κράτηση για αυτές τις ημερομηνίες.</p>";
         return;
     }
 
-// Στο renderDashboard(shop) του admin.js:
-filtered.forEach(res => {
-    const div = document.createElement('div');
-    div.className = "booking-item card";
-    div.style = "margin-bottom:20px; border-left:8px solid #2563eb; padding:20px; background:white; position:relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05);";
-    
-    div.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding-bottom:10px; margin-bottom:10px;">
-            <div>
-                <span style="font-size:1.4rem; font-weight:900; color:#2563eb;">${res.time}</span>
-                <span style="font-size:0.9rem; color:#94a3b8; margin-left:12px;">${res.date}</span>
+    filtered.forEach(res => {
+        const div = document.createElement('div');
+        div.className = "booking-item card";
+        div.style = "margin-bottom:12px; border-left:6px solid #2563eb; padding:15px; background:white; position:relative;";
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                    <span style="font-size:1.1rem; font-weight:800; color:#2563eb;">${res.time}</span>
+                    <span style="font-size:0.8rem; color:#94a3b8; margin-left:10px;">${res.date}</span>
+                </div>
+                <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:#ef4444; border:none; background:none; cursor:pointer; font-size:0.8rem;">Διαγραφή</button>
             </div>
-            <button onclick="deleteBooking('${shop}', '${res.id}')" style="color:#ef4444; border:1px solid #fee2e2; background:#fef2f2; padding:5px 12px; border-radius:6px; cursor:pointer; font-weight:700;">Διαγραφή</button>
-        </div>
-        <div>
-            <div style="font-weight:800; font-size:1.2rem; color:#1e293b;">${res.name}</div>
-            <div style="color:#475569; font-size:1rem; margin-top:5px;">
-                👥 <strong>${res.guests} άτομα</strong> | 📍 ${res.location || 'Εσωτερικός'}
+            <div style="margin-top:8px;">
+                <div style="font-weight:700; font-size:1rem;">${res.name}</div>
+                <div style="color:#475569; font-size:0.9rem;">👥 ${res.guests} άτομα</div>
+                <div style="color:#2563eb; font-size:0.9rem; margin-top:4px;">📞 <a href="tel:${res.phone}">${res.phone}</a></div>
             </div>
-            ${res.occasion ? `<div style="color:#db2777; font-weight:700; font-size:0.9rem; margin-top:8px; background:#fdf2f8; display:inline-block; padding:2px 8px; border-radius:4px;">🎉 ${res.occasion}</div>` : ''}
-            ${res.comments ? `<div style="background:#f8fafc; padding:12px; border-radius:8px; font-size:0.9rem; margin-top:10px; border:1px solid #e2e8f0; color:#334155;">💬 ${res.comments}</div>` : ''}
-            <div style="margin-top:15px;">
-                <a href="tel:${res.phone}" style="text-decoration:none; background:#2563eb; color:white; padding:8px 15px; border-radius:8px; font-weight:700; display:inline-block;">📞 Κλήση: ${res.phone}</a>
-            </div>
-        </div>
-    `;
-    list.appendChild(div);
-});
+        `;
+        list.appendChild(div);
+    });
+}
 
+// --- EVENT LISTENERS ---
 document.getElementById('filter-from').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
 document.getElementById('filter-to').onchange = () => renderDashboard(document.getElementById('shop-title').innerText);
 
