@@ -12,70 +12,72 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Παίρνουμε το μαγαζί από το URL
 const urlParams = new URLSearchParams(window.location.search);
-const shopID = urlParams.get('shop') || 'pandroso';
-document.getElementById('display-shop-name').innerText = shopID;
+const shopID = urlParams.get('shop') || "default_store";
+document.getElementById('shop-display').innerText = "Κράτηση στο: " + shopID;
 
-let selectedTime = "";
+let selectedTime = null;
+const timeContainer = document.getElementById('time-slots-container');
+const timeSelect = document.getElementById('time-select');
 
-// Δημιουργία ωρών (παράδειγμα 18:00 - 23:00)
-const timeContainer = document.getElementById('time-slots');
-const hours = ["18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00"];
+// Δημιουργία Ωρών (08:00 - 23:30)
+function setupTimeElements() {
+    for (let h = 8; h <= 23; h++) {
+        const hourStr = h < 10 ? '0' + h : h;
+        [`${hourStr}:00`, `${hourStr}:30`].forEach(t => {
+            const option = document.createElement('option');
+            option.value = t; option.innerText = t;
+            timeSelect.appendChild(option);
 
-hours.forEach(time => {
-    const btn = document.createElement('button');
-    btn.innerText = time;
-    btn.className = "time-btn";
-    btn.onclick = () => {
-        selectedTime = time;
-        openModal();
-    };
-    timeContainer.appendChild(btn);
-});
-
-function openModal() {
-    const date = document.getElementById('selected-date').value;
-    const guests = document.getElementById('guests-count').innerText;
-    if(!date) return alert("Επιλέξτε ημερομηνία πρώτα!");
-    
-    document.getElementById('summary-text').innerText = `Κράτηση για ${guests} άτομα στις ${date} και ώρα ${selectedTime}`;
-    document.getElementById('booking-modal').style.display = 'block';
+            const div = document.createElement('div');
+            div.className = 'time-slot';
+            div.innerText = t; div.dataset.time = t;
+            div.onclick = () => updateSelection(t);
+            timeContainer.appendChild(div);
+        });
+    }
 }
 
-document.getElementById('close-modal').onclick = () => {
-    document.getElementById('booking-modal').style.display = 'none';
-};
+function updateSelection(time) {
+    selectedTime = time;
+    timeSelect.value = time;
+    document.querySelectorAll('.time-slot').forEach(s => s.classList.toggle('selected', s.dataset.time === time));
+    document.getElementById('open-modal').style.display = 'block';
+}
 
-// Η ΤΕΛΙΚΗ ΕΠΙΒΕΒΑΙΩΣΗ
-document.getElementById('confirm-btn').onclick = () => {
+timeSelect.onchange = (e) => { if(e.target.value) updateSelection(e.target.value); };
+setupTimeElements();
+
+const modal = document.getElementById('booking-modal');
+document.getElementById('open-modal').onclick = () => {
+    if(!document.getElementById('cust-date-only').value) return alert("Επιλέξτε ημερομηνία!");
+    modal.style.display = 'flex';
+};
+document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+
+document.getElementById('btn-save').onclick = () => {
     const name = document.getElementById('cust-name').value;
     const phone = document.getElementById('cust-phone').value;
-    const date = document.getElementById('selected-date').value;
-    const guests = document.getElementById('guests-count').innerText;
+    const email = document.getElementById('cust-email').value;
+    const date = document.getElementById('cust-date-only').value;
+    const guests = document.getElementById('cust-guests').value;
     
-    // Τα νέα πεδία
-    const locationChoice = document.getElementById('seating-location').value;
-    const occasion = document.getElementById('special-occasion').value;
-    const comments = document.getElementById('additional-comments').value;
+    // ΣΥΛΛΟΓΗ ΝΕΩΝ ΠΕΔΙΩΝ
+    const location = document.getElementById('cust-location').value;
+    const occasion = document.getElementById('cust-occasion').value;
+    const comments = document.getElementById('cust-comments').value;
 
-    if(!name || !phone) return alert("Παρακαλώ βάλτε Όνομα και Τηλέφωνο!");
+    if(!name || !phone) return alert("Όνομα και Τηλέφωνο είναι υποχρεωτικά!");
 
-    const resRef = push(ref(db, `reservations/${shopID}`));
-    set(resRef, {
-        name,
-        phone,
-        date,
-        time: selectedTime,
-        guests,
-        location: locationChoice,
-        occasion: occasion,
-        comments: comments,
-        timestamp: Date.now()
-    }).then(() => {
-        alert("Η κράτηση στάλθηκε επιτυχώς!");
-        window.location.reload();
-    }).catch(err => {
-        alert("Σφάλμα σύνδεσης. Δοκιμάστε ξανά.");
+    const bookingData = { 
+        name, phone, email, date, 
+        time: selectedTime, guests, 
+        location, occasion, comments, // Αποθήκευση στη βάση
+        timestamp: Date.now() 
+    };
+
+    set(push(ref(db, 'reservations/' + shopID)), bookingData).then(() => {
+        alert("Επιτυχία! Η κράτηση αποθηκεύτηκε.");
+        location.reload();
     });
 };
