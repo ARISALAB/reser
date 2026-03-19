@@ -7,60 +7,84 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="app-container">
+        <header>
+            <h1>Table<span>Reserve</span></h1>
+            <h3 id="shop-display">Φόρτωση...</h3>
+        </header>
 
-    <div class="container">
-        <h2>Κράτηση στο <span id="display-shop-name">Κατάστημα</span></h2>
-        
-        <input type="date" id="selected-date" class="input-field">
-        
-        <div class="guests-selector">
-            <button onclick="changeGuests(-1)">-</button>
-            <span id="guests-count">2</span> Άτομα
-            <button onclick="changeGuests(1)">+</button>
+        <div class="card">
+            <div class="input-group">
+                <label>Ημερομηνία</label>
+                <input type="date" id="cust-date-only">
+            </div>
+
+            <div class="input-group">
+                <label>Άτομα</label>
+                <select id="cust-guests">
+                    <option value="1">1 Άτομο</option>
+                    <option value="2" selected>2 Άτομα</option>
+                    <option value="3">3 Άτομα</option>
+                    <option value="4">4 Άτομα</option>
+                    <option value="5">5 Άτομα</option>
+                    <option value="6">6 Άτομα</option>
+                    <option value="8">8 Άτομα</option>
+                </select>
+            </div>
+
+            <label>Επιλέξτε Ώρα</label>
+            <select id="time-select" style="width:100%; margin-top:5px; margin-bottom:10px;">
+                <option value="">-- Επιλογή --</option>
+            </select>
+            
+            <div id="time-slots-container" class="time-grid"></div>
+
+            <button class="btn-primary" id="open-modal" style="display:none; margin-top:20px;">Συνέχεια Κράτησης</button>
         </div>
-
-        <div id="time-slots" class="time-grid"></div>
     </div>
 
-    <div id="booking-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999;">
-        <div class="modal-content" style="background:white; margin:10% auto; padding:25px; width:90%; max-width:450px; border-radius:15px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-            <h3 style="margin-top:0; color:#1e293b;">Ολοκλήρωση Κράτησης</h3>
-            <p id="summary-text" style="background:#f1f5f9; padding:10px; border-radius:8px; font-size:0.9rem;"></p>
+    <div id="booking-modal" class="modal">
+        <div class="modal-content card">
+            <h3>Στοιχεία Κράτησης</h3>
+            
+            <div class="input-group">
+                <label>Ονοματεπώνυμο</label>
+                <input type="text" id="cust-name" placeholder="π.χ. Νίκος Παπαδόπουλος">
+            </div>
 
-            <div class="form-group">
-                <input type="text" id="cust-name" placeholder="Ονοματεπώνυμο" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #cbd5e1; border-radius:8px;">
-                <input type="tel" id="cust-phone" placeholder="Τηλέφωνο Επικοινωνίας" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #cbd5e1; border-radius:8px;">
-                
-                <label style="font-size:0.85rem; font-weight:bold; color:#475569; display:block; margin-bottom:5px;">Πού θέλετε να καθίσετε;</label>
-                <select id="seating-location" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #cbd5e1; border-radius:8px;">
-                    <option value="Εσωτερικός Χώρος">Εσωτερικός Χώρος</option>
-                    <option value="Εξωτερικός Χώρος">Εξωτερικός Χώρος</option>
+            <div class="input-group">
+                <label>Τηλέφωνο</label>
+                <input type="tel" id="cust-phone" placeholder="69XXXXXXXX">
+            </div>
+
+            <div class="input-group">
+                <label>Email (Προαιρετικό)</label>
+                <input type="email" id="cust-email" placeholder="name@example.com">
+            </div>
+
+            <div class="input-group">
+                <label>Προτίμηση Χώρου</label>
+                <select id="cust-location">
+                    <option value="Εσωτερικός">Εσωτερικός Χώρος</option>
+                    <option value="Εξωτερικός">Εξωτερικός Χώρος</option>
                     <option value="Δεν έχω προτίμηση">Δεν έχω προτίμηση</option>
                 </select>
-
-                <input type="text" id="special-occasion" placeholder="Ειδικό Γεγονός (π.χ. Γενέθλια, Επέτειος)" style="width:100%; padding:12px; margin-bottom:12px; border:1px solid #cbd5e1; border-radius:8px;">
-                
-                <textarea id="additional-comments" placeholder="Επιπλέον αιτήματα (π.χ. Παιδικό κάθισμα, αλλεργίες)" rows="3" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #cbd5e1; border-radius:8px; font-family:inherit;"></textarea>
             </div>
 
-            <div style="display:flex; gap:10px;">
-                <button id="confirm-btn" style="flex:2; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Επιβεβαίωση</button>
-                <button id="close-modal" style="flex:1; padding:12px; background:#e2e8f0; color:#475569; border:none; border-radius:8px; cursor:pointer;">Ακύρωση</button>
+            <div class="input-group">
+                <label>Ειδικό Γεγονός</label>
+                <input type="text" id="cust-occasion" placeholder="π.χ. Γενέθλια, Επέτειος">
             </div>
+
+            <div class="input-group">
+                <label>Επιπλέον Αιτήματα</label>
+                <textarea id="cust-comments" rows="2" style="padding:10px; border-radius:8px; border:1px solid #e2e8f0; font-family:inherit;"></textarea>
+            </div>
+
+            <button class="btn-primary" id="btn-save">Επιβεβαίωση Κράτησης</button>
+            <button class="btn-link" id="close-modal">Ακύρωση</button>
         </div>
     </div>
-
-    <script type="module" src="client.js"></script>
-    <script>
-        // Απλή λογική για τα άτομα
-        function changeGuests(val) {
-            let count = document.getElementById('guests-count');
-            let current = parseInt(count.innerText);
-            if(current + val >= 1) count.innerText = current + val;
-        }
-    </script>
-</body>
-</html>    </div>
 
     <script type="module" src="client.js"></script>
 </body>
