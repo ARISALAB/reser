@@ -13,47 +13,28 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 const urlParams = new URLSearchParams(window.location.search);
-const shopID = urlParams.get('shop') || 'default';
-document.getElementById('display-shop-name').innerText = shopID;
+const shopID = urlParams.get('shop') || "default_store";
+document.getElementById('shop-display').innerText = "Κράτηση στο: " + shopID;
 
 let selectedTime = null;
-const times = ["19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00", "22:30"];
-const timeContainer = document.getElementById('time-slots');
+const timeContainer = document.getElementById('time-slots-container');
+const timeSelect = document.getElementById('time-select');
 
-times.forEach(t => {
-    const btn = document.createElement('button');
-    btn.innerText = t;
-    btn.className = "time-btn"; // Φτιάξε το στυλ στο CSS σου
-    btn.onclick = () => {
-        document.querySelectorAll('.time-btn').forEach(b => b.style.background = '#f1f5f9');
-        btn.style.background = '#2563eb';
-        btn.style.color = 'white';
-        selectedTime = t;
-    };
-    timeContainer.appendChild(btn);
-});
+// Δημιουργία Ωρών (08:00 - 23:30)
+function setupTimeElements() {
+    for (let h = 8; h <= 23; h++) {
+        const hourStr = h < 10 ? '0' + h : h;
+        [`${hourStr}:00`, `${hourStr}:30`].forEach(t => {
+            const option = document.createElement('option');
+            option.value = t; option.innerText = t;
+            timeSelect.appendChild(option);
 
-document.getElementById('btn-submit').onclick = async () => {
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const guests = document.getElementById('guests').value;
-    const date = document.getElementById('date').value;
-    const location = document.getElementById('seating-location').value;
-    const occasion = document.getElementById('special-occasion').value;
-    const comments = document.getElementById('additional-comments').value;
-
-    if(!name || !phone || !date || !selectedTime) return alert("Συμπληρώστε τα βασικά στοιχεία!");
-
-    const newBookingRef = push(ref(db, `reservations/${shopID}`));
-    await set(newBookingRef, {
-        name, phone, guests, date, time: selectedTime,
-        location, occasion, comments,
-        timestamp: Date.now()
-    });
-
-    alert("Η κράτησή σας ολοκληρώθηκε!");
-    location.reload();
-};        });
+            const div = document.createElement('div');
+            div.className = 'time-slot';
+            div.innerText = t; div.dataset.time = t;
+            div.onclick = () => updateSelection(t);
+            timeContainer.appendChild(div);
+        });
     }
 }
 
